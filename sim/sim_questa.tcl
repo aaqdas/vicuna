@@ -4,18 +4,18 @@
 
 
 if {$argc < 6} {
-    puts "usage: sim.tcl VPROC_DIR CORE_DIR CONFIG_FILE PARAMS LOG_FILE PROG_PATHS_LIST \[SYMBOLS ...\]"
+    puts "usage: sim_questa.tcl VPROC_DIR CORE_DIR CONFIG_FILE PARAMS LOG_FILE PROG_PATHS_LIST \[SYMBOLS ...\]"
     exit 2
 }
 
 # get command line arguments
-set vproc_dir $1
-set core_dir $2
-set config_file_path $3
+set vproc_dir //wsl.localhost/Ubuntu-20.04/$1
+set core_dir //wsl.localhost/Ubuntu-20.04/$2
+set config_file_path //wsl.localhost/Ubuntu-20.04/$3
 set params_var $4
-set log_file_path $5
-set prog_paths_var $6
-set log_signals $7
+set log_file_path //wsl.localhost/Ubuntu-20.04/$5
+set prog_paths_var //wsl.localhost/Ubuntu-20.04/$6
+set log_signals /$7
 
 # default values for dv_utils and prim
 set dv_utils ""
@@ -38,7 +38,7 @@ if {[string first "ibex" $core_dir] != -1} {
     lappend src_list "$core_dir/rtl/ibex_pkg.sv"
     lappend src_list "$core_dir/rtl/ibex_tracer_pkg.sv"
     lappend src_list "$core_dir/vendor/lowrisc_ip/ip/prim/rtl/prim_ram_1p_pkg.sv"
-    foreach file [glob -type f $core_dir\/*rtl\/*\[a-z,_\]*.sv] {
+    foreach file [glob -type f $core_dir\/rtl\/*\[a-z,_\]*.sv] {
         lappend src_list $file
     }
     lappend src_list "$core_dir/syn/rtl/prim_clock_gating.v"
@@ -47,7 +47,7 @@ if {[string first "ibex" $core_dir] != -1} {
 } elseif {[string first "cv32e40x" $core_dir] != -1} {
     set main_core "MAIN_CORE_CV32E40X"
     lappend src_list "$core_dir/rtl/include/cv32e40x_pkg.sv"
-    foreach file [glob -type f $core_dir\/*rtl\/*\[a-z,_\]*.sv] {
+    foreach file [glob -type f $core_dir\/rtl\/*\[a-z,_\]*.sv] {
         lappend src_list $file
     }
     lappend src_list "$core_dir/bhv/cv32e40x_sim_clock_gate.sv"
@@ -56,18 +56,18 @@ foreach file [glob -type f $vproc_dir\/*rtl\/*\[a-z,_\]*.sv] {
     lappend src_list $file
 }
 
-vlib work
+vlib.exe work
 
-foreach file $src_list {vlog -work work $file +define+$main_core +incdir+$prim+$dv_utils}
+foreach file $src_list {vlog -sv -work work $file +define+$main_core +incdir+$prim+$dv_utils}
 
 vopt +acc vproc_tb -o vproc_tb_opt -debugdb -G VMEM_W=$VMEM_W      \
      -G MEM_W=$MEM_W -G MEM_SZ=$MEM_SZ -G MEM_LATENCY=$MEM_LATENCY \
      -G ICACHE_SZ=$ICACHE_SZ -G ICACHE_LINE_W=$ICACHE_LINE_W       \
      -G DCACHE_SZ=$DCACHE_SZ -G DCACHE_LINE_W=$DCACHE_LINE_W       \
-     -G VREG_TYPE=$VREG_TYPE -G MUl_TYPE=$MUL_TYPE                 \
+     -G VREG_TYPE=$VREG_TYPE -G MUL_TYPE=$MUL_TYPE                 \
      +define+$main_core -G PROG_PATHS_LIST=$prog_paths_var
 
-vsim -work work vproc_tb_opt
+vsim.exe -work work vproc_tb_opt
 
 # add all signals
 add wave -r /*

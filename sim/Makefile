@@ -16,7 +16,8 @@ VIVADO_TCL := $(addprefix $(SIM_DIR),sim_vivado.tcl)
 
 # Questa TCL script and variable
 QUESTA_TCL := $(addprefix $(SIM_DIR),sim_questa.tcl)
-VSIM       ?= vsim
+# QUESTA_TCL := ./sim_questa.tcl
+VSIM       ?= vsim.exe
 
 # project directory
 PROJ_DIR_TMP := $(shell mktemp -d)
@@ -24,7 +25,7 @@ PROJ_DIR     ?= $(PROJ_DIR_TMP)
 
 # select the core to use as main processor (defaults to Ibex)
 CORE     ?= ibex
-CORE_DIR := $(SIM_DIR)/../$(CORE)/
+CORE_DIR := $(SIM_DIR)../$(CORE)/
 
 # memory initialization files
 PROG_PATHS ?= progs.txt
@@ -44,7 +45,7 @@ ICACHE_LINE_W ?= 128
 DCACHE_SZ     ?= 0
 DCACHE_LINE_W ?= $(shell echo $$(( $(VMEM_W) * 2 )))
 
-all: verilator
+all: questa
 
 # vector coprocessor configuration file generation (defines VMEM_W and VREG_W)
 VPROC_CONFIG_PKG := $(PROJ_DIR)/vproc_config.sv

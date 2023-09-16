@@ -8,7 +8,7 @@
 
 SW_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
-COMPILER ?= llvm
+COMPILER ?= gcc
 ifeq ($(COMPILER),gcc)
     RISCV_CC            := riscv32-unknown-elf-gcc
     RISCV_DUMP          := riscv32-unknown-elf-objdump
@@ -37,7 +37,7 @@ endif
 
 
 RISCV_FLAGS := -march=$(ARCH) -mabi=ilp32 -static -mcmodel=medany             \
-               -fvisibility=hidden -nostdlib -nostartfiles -Wall              \
+               -fvisibility=hidden -nostartfiles -Wall              \
                $(CC_SPECIFIC_OPTIONS)
 
 CFLAGS := $(CFLAGS) -I$(SW_DIR)/lib/
@@ -46,12 +46,12 @@ PROG ?= test
 OBJ  ?= test.o
 
 # add crt0 to object files
-RISCV_OBJ := $(SW_DIR)/crt0.o $(OBJ) $(SW_DIR)/lib/uart.o
+RISCV_OBJ := $(SW_DIR)/crt0.o $(OBJ) $(SW_DIR)/lib/uart.o $(SW_DIR)/lib/runtime.o
 
 all: $(PROG).vmem
 
 dump: $(PROG).elf
-	$(RISCV_DUMP) -D $<
+	$(RISCV_DUMP) -D $< > main.dump
 
 $(PROG).elf: $(RISCV_OBJ) $(LD_SCRIPT)
 	$(RISCV_CC) $(RISCV_FLAGS) -T $(LD_SCRIPT) $(LDFLAGS) $(RISCV_OBJ) -o $@
